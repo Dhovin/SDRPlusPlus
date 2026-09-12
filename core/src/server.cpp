@@ -203,13 +203,21 @@ namespace server {
     void _packetHandler(int count, uint8_t* buf, void* ctx) {
         PacketHeader* hdr = (PacketHeader*)buf;
 
-        // Read the rest of the data (TODO: CHECK SIZE OR SHIT WILL BE FUCKED + ADD TIMEOUT)
+        // Validate packet size to prevent buffer overflow
+        if (hdr->size > SERVER_MAX_PACKET_SIZE || hdr->size < sizeof(PacketHeader)) {
+            flog::error("Received invalid packet size: {0}", hdr->size);
+            sendError(ERROR_INVALID_PACKET);
+            if (client) { client->close(); }
+            return;
+        }
+
+        // Read the rest of the data
         int len = 0;
         int read = 0;
         int goal = hdr->size - sizeof(PacketHeader);
         while (len < goal) {
             read = client->read(goal - len, &buf[sizeof(PacketHeader) + len]);
-            if (read < 0) { return; };
+            if (read <= 0) { return; }
             len += read;
         }
 

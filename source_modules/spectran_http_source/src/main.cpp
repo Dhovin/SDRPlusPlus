@@ -27,7 +27,7 @@ public:
     SpectranHTTPSourceModule(std::string name) {
         this->name = name;
 
-        strcpy(hostname, "localhost");
+        snprintf(hostname, sizeof(hostname), "localhost");
         sampleRate = 5750000.0;
 
         handler.ctx = this;

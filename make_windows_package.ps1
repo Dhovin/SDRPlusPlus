@@ -1,7 +1,15 @@
 $build_dir=$args[0]
 $root_dir=$args[1]
 
-mkdir sdrpp_windows_x64
+function Safe-Copy {
+    param($Src, $Dst)
+    if (Test-Path $Src) {
+        Copy-Item -Path $Src -Destination $Dst -Force -ErrorAction SilentlyContinue
+    }
+}
+
+mkdir sdrpp_windows_x64 -ErrorAction SilentlyContinue
+mkdir sdrpp_windows_x64/modules -ErrorAction SilentlyContinue
 
 # Copy root
 cp -Recurse $root_dir/* sdrpp_windows_x64/

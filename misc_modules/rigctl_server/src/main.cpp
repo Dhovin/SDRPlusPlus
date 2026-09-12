@@ -16,7 +16,7 @@
 
 SDRPP_MOD_INFO{
     /* Name:            */ "rigctl_server",
-    /* Description:     */ "My fancy new module",
+    /* Description:     */ "Rigctl server module for controlling SDR++ with software like gpredict",
     /* Author:          */ "Ryzerth",
     /* Version:         */ 0, 1, 0,
     /* Max instances    */ -1
@@ -45,7 +45,7 @@ public:
             config.conf[name]["recorder"] = "";
         }
         std::string host = config.conf[name]["host"];
-        strcpy(hostname, host.c_str());
+        snprintf(hostname, sizeof(hostname), "%s", host.c_str());
         port = config.conf[name]["port"];
         tuningEnabled = config.conf[name]["tuning"];
         recordingEnabled = config.conf[name]["recording"];

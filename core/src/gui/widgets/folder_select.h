@@ -8,6 +8,9 @@
 class FolderSelect {
 public:
     FolderSelect(std::string defaultPath);
+    ~FolderSelect() {
+        if (workerThread.joinable()) { workerThread.join(); }
+    }
     bool render(std::string id);
     void setPath(std::string path, bool markChanged = false);
     bool pathIsValid();

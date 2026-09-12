@@ -48,7 +48,7 @@ public:
             config.conf[_streamName]["listening"] = false;
         }
         std::string host = config.conf[_streamName]["hostname"];
-        strcpy(hostname, host.c_str());
+        snprintf(hostname, sizeof(hostname), "%s", host.c_str());
         port = config.conf[_streamName]["port"];
         modeId = config.conf[_streamName]["protocol"];
         sampleRate = config.conf[_streamName]["sampleRate"];

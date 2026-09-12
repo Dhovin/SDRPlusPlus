@@ -47,7 +47,7 @@ public:
     RecorderModule(std::string name) : folderSelect("%ROOT%/recordings") {
         this->name = name;
         root = (std::string)core::args["root"];
-        strcpy(nameTemplate, "$t_$f_$h-$m-$s_$d-$M-$y");
+        snprintf(nameTemplate, sizeof(nameTemplate), "$t_$f_$h-$m-$s_$d-$M-$y");
 
         // Define the time zones
         timezones.define("local", "Local", TIME_ZONE_LOCAL);
@@ -100,7 +100,7 @@ public:
             if (_nameTemplate.length() > sizeof(nameTemplate)-1) {
                 _nameTemplate = _nameTemplate.substr(0, sizeof(nameTemplate)-1);
             }
-            strcpy(nameTemplate, _nameTemplate.c_str());
+            snprintf(nameTemplate, sizeof(nameTemplate), "%s", _nameTemplate.c_str());
         }
         config.release();
 

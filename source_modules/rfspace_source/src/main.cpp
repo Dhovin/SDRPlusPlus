@@ -40,7 +40,7 @@ public:
         // Load config
         config.acquire();
         std::string hostStr = config.conf["hostname"];
-        strcpy(hostname, hostStr.c_str());
+        snprintf(hostname, sizeof(hostname), "%s", hostStr.c_str());
         port = config.conf["port"];
         config.release();
 

@@ -131,7 +131,7 @@ private:
         ImGui::OpenPopup(id.c_str());
 
         char nameBuf[1024];
-        strcpy(nameBuf, editedBookmarkName.c_str());
+        snprintf(nameBuf, sizeof(nameBuf), "%s", editedBookmarkName.c_str());
 
         if (ImGui::BeginPopup(id.c_str(), ImGuiWindowFlags_NoResize)) {
             ImGui::BeginTable(("freq_manager_edit_table" + name).c_str(), 2);
@@ -202,7 +202,7 @@ private:
         ImGui::OpenPopup(id.c_str());
 
         char nameBuf[1024];
-        strcpy(nameBuf, editedListName.c_str());
+        snprintf(nameBuf, sizeof(nameBuf), "%s", editedListName.c_str());
 
         if (ImGui::BeginPopup(id.c_str(), ImGuiWindowFlags_NoResize)) {
             ImGui::LeftLabel("Name");

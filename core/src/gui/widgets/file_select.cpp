@@ -51,7 +51,7 @@ void FileSelect::setPath(std::string path, bool markChanged) {
     std::string expandedPath = expandString(path);
     pathValid = std::filesystem::is_regular_file(expandedPath);
     if (markChanged) { pathChanged = true; }
-    strcpy(strPath, path.c_str());
+    snprintf(strPath, sizeof(strPath), "%s", path.c_str());
 }
 
 std::string FileSelect::expandString(std::string input) {
@@ -69,7 +69,7 @@ void FileSelect::worker() {
 
     if (res.size() > 0) {
         path = res[0];
-        strcpy(strPath, path.c_str());
+        snprintf(strPath, sizeof(strPath), "%s", path.c_str());
         pathChanged = true;
     }
 

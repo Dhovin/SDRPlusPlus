@@ -43,33 +43,48 @@ ModuleManager::Module_t ModuleManager::loadModule(std::string path) {
     mod.deleteInstance = (void (*)(Instance*))dlsym(mod.handle, "_DELETE_INSTANCE_");
     mod.end = (void (*)())dlsym(mod.handle, "_END_");
 #endif
+    auto unloadHandle = [](void* handle) {
+        if (!handle) { return; }
+#ifdef _WIN32
+        FreeLibrary((HMODULE)handle);
+#else
+        dlclose(handle);
+#endif
+    };
+
     if (mod.info == NULL) {
         flog::error("{0} is missing _INFO_ symbol", path);
+        unloadHandle(mod.handle);
         mod.handle = NULL;
         return mod;
     }
     if (mod.init == NULL) {
         flog::error("{0} is missing _INIT_ symbol", path);
+        unloadHandle(mod.handle);
         mod.handle = NULL;
         return mod;
     }
     if (mod.createInstance == NULL) {
         flog::error("{0} is missing _CREATE_INSTANCE_ symbol", path);
+        unloadHandle(mod.handle);
         mod.handle = NULL;
         return mod;
     }
     if (mod.deleteInstance == NULL) {
         flog::error("{0} is missing _DELETE_INSTANCE_ symbol", path);
+        unloadHandle(mod.handle);
         mod.handle = NULL;
         return mod;
     }
     if (mod.end == NULL) {
         flog::error("{0} is missing _END_ symbol", path);
+        unloadHandle(mod.handle);
         mod.handle = NULL;
         return mod;
     }
     if (modules.find(mod.info->name) != modules.end()) {
         flog::error("{0} has the same name as an already loaded module", path);
+        unloadHandle(mod.handle);
         mod.handle = NULL;
         return mod;
     }

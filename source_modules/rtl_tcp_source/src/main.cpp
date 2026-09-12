@@ -51,7 +51,7 @@ public:
         config.acquire();
         if (config.conf.contains("host")) {
             std::string hostStr = config.conf["host"];
-            strcpy(ip, hostStr.c_str());
+            snprintf(ip, sizeof(ip), "%s", hostStr.c_str());
         }
         if (config.conf.contains("port")) {
             port = config.conf["port"];

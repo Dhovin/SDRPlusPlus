@@ -334,7 +334,7 @@ namespace sourcemenu {
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - spacing);
         if (ImGui::Button("+##_sdrpp_offset_add_", ImVec2(lineHeight + 0.5f*spacing, 0))) {
-            strcpy(newOffsetName, "New Offset");
+            snprintf(newOffsetName, sizeof(newOffsetName), "New Offset");
             showAddOffsetDialog = true;
         }
 

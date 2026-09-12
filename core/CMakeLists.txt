@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 project(sdrpp_core)
 
 if (USE_INTERNAL_LIBCORRECT)
@@ -157,7 +157,9 @@ else()
     endif (NOT USE_INTERNAL_LIBCORRECT)
 
     if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-        target_link_libraries(sdrpp_core PUBLIC stdc++fs)
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+            target_link_libraries(sdrpp_core PUBLIC stdc++fs)
+        endif ()
     endif ()
 
 endif ()

@@ -71,32 +71,28 @@ There are currently no BSD packages, refer to [Building on Linux / BSD](https://
 
 # Building on Windows
 
-The preferred IDE is [VS Code](https://code.visualstudio.com/) in order to have similar development experience across platforms and to build with CMake using the command line.
+The recommended build environment is **Visual Studio 2022** (MSVC v143 toolset) or **VS Code** configured with the CMake Tools extension.
 
 ## Install dependencies
 
-* [cmake](https://cmake.org)
+* [CMake](https://cmake.org) (3.16 or newer)
 * [vcpkg](https://vcpkg.io)
-* [PothosSDR](https://github.com/pothosware/PothosSDR) (This will install libraries for most SDRs. You have to install it in `C:/Program Files/PothosSDR`)
-* [RtAudio](https://www.music.mcgill.ca/~gary/rtaudio/) (You have to build and install it in `C:/Program Files (x86)/RtAudio/`)
+* [PothosSDR](https://github.com/pothosware/PothosSDR) or individual SDR vendor drivers (Install PothosSDR in `C:/Program Files/PothosSDR` if using pre-packaged SDR drivers)
+* [RtAudio](https://www.music.mcgill.ca/~gary/rtaudio/) (Install in `C:/Program Files (x86)/RtAudio/` or build via CMake)
 
-After this, install the following dependencies using vcpkg:
+Next, install required libraries via vcpkg (64-bit):
 
-* fftw3
-* glfw3
-* zstd
-
-You are probably going to build in 64 bit so make sure vcpkg installs the correct versions using `.\vcpkg.exe install <package>:x64-windows`
+```powershell
+.\vcpkg.exe install fftw3:x64-windows glfw3:x64-windows zstd:x64-windows libusb:x64-windows
+```
 
 ## Building using the command line
 
-**IMPORTANT:** Replace `<vcpkg install directory>` with vcpkg's install directory.
+Replace `<vcpkg install directory>` with the absolute path to your vcpkg installation:
 
-```
-mkdir build
-cd build
-cmake .. "-DCMAKE_TOOLCHAIN_FILE=<vcpkg install directory>/scripts/buildsystems/vcpkg.cmake" -G "Visual Studio 16 2019"
-cmake --build . --config Release
+```bat
+cmake -B build -S . "-DCMAKE_TOOLCHAIN_FILE=<vcpkg install directory>/scripts/buildsystems/vcpkg.cmake" -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Release -j
 ```
 
 ## Running for development
@@ -181,25 +177,32 @@ The build options are then passed to the cmake command as such `cmake .. -DOPTIO
 
 ## Install dependencies
 
-* cmake
-* fftw3
-* glfw
-* libvolk
-* zstd
+### Debian / Ubuntu (Ubuntu 22.04 / 24.04 LTS, Debian 12 Bookworm, Debian 13 Trixie)
 
-Next install dependencies based on the modules you wish to build (See previous step)
+```sh
+sudo apt update
+sudo apt install build-essential cmake git libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev librtaudio-dev \
+    libairspy-dev libairspyhf-dev libhackrf-dev librtlsdr-dev libiio-dev libad9361-dev
+```
+*(Note: on newer distributions, `libvolk2-dev` is provided as `libvolk-dev` or `libvolk3-dev`)*
 
-Note: make sure you're using GCC 8 or later as older versions do not have `std::filesystem` built-in.
+### Arch Linux / Manjaro
+
+```sh
+sudo pacman -S base-devel cmake git fftw glfw-x11 volk zstd rtaudio
+```
+
+### Fedora
+
+```sh
+sudo dnf install @development-tools cmake git fftw-devel glfw-devel volk-devel libzstd-devel rtaudio-devel
+```
 
 ## Building
 
-replace `<N>` with the number of threads you wish to use to build
-
 ```sh
-mkdir build
-cd build
-cmake ..
-make -j<N>
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
 ```
 
 ## Create a new root directory
@@ -210,12 +213,12 @@ sh ./create_root.sh
 
 ## Running for development
 
-If you wish to install SDR++, skip to the next step
+If you wish to install SDR++, skip to the next step.
 
-First run SDR++ from the build directory to generate a default config file
+First run SDR++ from the build directory to generate a default config file:
 
-```
-./sdrpp -r ../root_dev/
+```sh
+./build/sdrpp -r root_dev/
 ```
 
 Then, you will need to edit the `root_dev/config.json` file to point to the modules that were built. Here is an example of what it should look like:
@@ -223,17 +226,15 @@ Then, you will need to edit the `root_dev/config.json` file to point to the modu
 ```json
 ...
 "modules": [
-    "./build/radio/radio.so",
-    "./build/recorder/recorder.so",
-    "./build/rtl_tcp_source/rtl_tcp_source.so",
-    "./build/audio_sink/audio_sink.so"
+    "./build/decoder_modules/radio/radio.so",
+    "./build/misc_modules/recorder/recorder.so",
+    "./build/source_modules/rtl_tcp_source/rtl_tcp_source.so",
+    "./build/sink_modules/audio_sink/audio_sink.so"
 ]
 ...
 ```
 
-Note: You can generate this list automatically by running `find . | grep '\.so' | sed 's/^/"/' | sed 's/$/",/' | sed '/sdrpp_core.so/d'` in the build directory.
-
-You also need to change the location of the resource and module directories, for development, I recommend:
+You also need to change the location of the resource and module directories for development:
 
 ```json
 ...
@@ -245,68 +246,58 @@ You also need to change the location of the resource and module directories, for
 
 Remember that these paths will be relative to the run directory.
 
-Of course, remember to add entries for all modules that were built and that you wish to use.
-
 Next, from the top directory, you can simply run:
 
-```
+```sh
 ./build/sdrpp -r root_dev
-```
-
-Or, if you wish to run from the build directory, you will need to correct the directories in the config.json file, and then run:
-
-```
-./sdrpp -r ../root_dev
 ```
 
 ## Installing SDR++
 
-To install SDR++, run the following command in your ``build`` folder:
+To install SDR++ system-wide, run:
 
 ```sh
-sudo make install
+sudo cmake --install build
 ```
 
 # Building on MacOS
 
-Warning: This is not for the faint of heart and the instructions are mostly untested. It is recommended to use the [nightly builds](https://www.sdrpp.org/nightly) instead.
+SDR++ supports modern macOS versions on both Apple Silicon (ARM64) and Intel (x86_64).
 
 ## Install dependencies
 
-The dependencies are exactly the same as for linux, see that section for the core dependencies as well as the module list for the per-module dependencies.
-You will need to install the dependencies using Homebrew.
-
-Make sure to install portaudio as it'll be needed later.
-
-An example install command would be:
+Install dependencies using [Homebrew](https://brew.sh/):
 
 ```sh
-brew install libusb fftw glfw airspy airspyhf portaudio hackrf rtl-sdr libbladerf codec2 zstd volk
-pip3 install mako
+brew install cmake fftw glfw volk zstd portaudio libusb airspy airspyhf hackrf rtl-sdr libbladerf codec2
 ```
 
 ## Build
 
-You will need a few special cmake argument on top of the linux ones. You will need to enable the portaudio sink modules `-DOPT_BUILD_PORTAUDIO_SINK=ON -DOPT_BUILD_NEW_PORTAUDIO_SINK=ON` and disable the usual rtaudio sink `-DOPT_BUILD_AUDIO_SINK=OFF` as well as the option to tell SDR++ that it will run as a MacOS bundle `-DUSE_BUNDLE_DEFAULTS=ON`. On MacOS versions older than Catalina (10.15), you will also need to use the internal std::filesystem as the OS can't provide it `-DOPT_OVERRIDE_STD_FILESYSTEM=ON`.
-
-Here is an example of build commands that will build almost all modules at the time of writing. You can always check the CI scripts for the latest arguments just in case but this should work. From the top of the SDRPlusPlus directory:
+Enable PortAudio sinks, disable RtAudio (which has issues on macOS), and enable macOS bundle defaults:
 
 ```sh
-mkdir build
-cd build
-cmake .. -DOPT_BUILD_SOAPY_SOURCE=OFF -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_AUDIO_SOURCE=OFF -DOPT_BUILD_AUDIO_SINK=OFF -DOPT_BUILD_PORTAUDIO_SINK=ON -DOPT_BUILD_NEW_PORTAUDIO_SINK=ON -DOPT_BUILD_M17_DECODER=ON -DUSE_BUNDLE_DEFAULTS=ON -DCMAKE_BUILD_TYPE=Release
-make -j<N>
+cmake -B build -S . \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DOPT_BUILD_AUDIO_SINK=OFF \
+    -DOPT_BUILD_PORTAUDIO_SINK=ON \
+    -DOPT_BUILD_NEW_PORTAUDIO_SINK=ON \
+    -DOPT_BUILD_BLADERF_SOURCE=ON \
+    -DOPT_BUILD_M17_DECODER=ON \
+    -DUSE_BUNDLE_DEFAULTS=ON
+
+cmake --build build -j$(sysctl -n hw.ncpu)
 ```
 
 ## Create bundle and install
 
-From the top of the SDRPlusPlus directory:
+From the repository root:
 
 ```sh
 sh make_macos_bundle.sh ./build ./SDR++.app
 ```
 
-This will create a `SDR++.app` bundle that you can instal like any other MacOS app by dragging it into Applications.
+This will produce the `SDR++.app` bundle, which you can drag into `/Applications`.
 
 # Module List
 
@@ -320,12 +311,14 @@ Modules in beta are still included in releases for the most part but not enabled
 | airspy_source        | Working    | libairspy         | OPT_BUILD_AIRSPY_SOURCE        | ✅              | ✅                     | ✅                         |
 | airspyhf_source      | Working    | libairspyhf       | OPT_BUILD_AIRSPYHF_SOURCE      | ✅              | ✅                     | ✅                         |
 | audio_source         | Working    | rtaudio           | OPT_BUILD_AUDIO_SOURCE         | ✅              | ✅                     | ✅                         |
-| bladerf_source       | Working    | libbladeRF        | OPT_BUILD_BLADERF_SOURCE       | ⛔              | ✅ (not Debian Buster) | ✅                         |
+| bladerf_source       | Working    | libbladeRF        | OPT_BUILD_BLADERF_SOURCE       | ⛔              | ✅                     | ✅                         |
+| dragonlabs_source    | Working    | libdlcr           | OPT_BUILD_DRAGONLABS_SOURCE    | ⛔              | ⛔                     | ✅                         |
 | file_source          | Working    | -                 | OPT_BUILD_FILE_SOURCE          | ✅              | ✅                     | ✅                         |
-| fobossdr_source      | Working    | libfobos          | OPT_BUILD_FOBOSSDR_SOURCE      | ✅              | ✅                     | ✅                         |
+| fobossdr_source      | Working    | libfobos          | OPT_BUILD_FOBOSSDR_SOURCE      | ⛔              | ✅                     | ✅                         |
 | hackrf_source        | Working    | libhackrf         | OPT_BUILD_HACKRF_SOURCE        | ✅              | ✅                     | ✅                         |
 | harogic_source       | Beta       | htra_api          | OPT_BUILD_HAROGIC_SOURCE       | ⛔              | ⛔                     | ✅                         |
 | hermes_source        | Beta       | -                 | OPT_BUILD_HERMES_SOURCE        | ✅              | ✅                     | ✅                         |
+| hydrasdr_source      | Working    | libhydrasdr       | OPT_BUILD_HYDRASDR_SOURCE      | ⛔              | ✅                     | ✅                         |
 | kcsdr_source         | Unfinished | libkcsdr          | OPT_BUILD_KCSDR_SOURCE         | ⛔              | ⛔                     | ⛔                         |
 | limesdr_source       | Working    | liblimesuite      | OPT_BUILD_LIMESDR_SOURCE       | ⛔              | ✅                     | ✅                         |
 | network_source       | Beta       | -                 | OPT_BUILD_NETWORK_SOURCE       | ✅              | ✅                     | ✅                         |
@@ -335,6 +328,7 @@ Modules in beta are still included in releases for the most part but not enabled
 | rfspace_source       | Working    | -                 | OPT_BUILD_RFSPACE_SOURCE       | ✅              | ✅                     | ✅                         |
 | rtl_sdr_source       | Working    | librtlsdr         | OPT_BUILD_RTL_SDR_SOURCE       | ✅              | ✅                     | ✅                         |
 | rtl_tcp_source       | Working    | -                 | OPT_BUILD_RTL_TCP_SOURCE       | ✅              | ✅                     | ✅                         |
+| sddc_source          | Beta       | libsddc           | OPT_BUILD_SDDC_SOURCE          | ⛔              | ⛔                     | ⛔                         |
 | sdrplay_source       | Working    | SDRplay API       | OPT_BUILD_SDRPLAY_SOURCE       | ⛔              | ✅                     | ✅                         |
 | sdrpp_server_source  | Working    | -                 | OPT_BUILD_SDRPP_SERVER_SOURCE  | ✅              | ✅                     | ✅                         |
 | soapy_source         | Deprecated | soapysdr          | OPT_BUILD_SOAPY_SOURCE         | ⛔              | ⛔                     | ⛔                         |
@@ -360,12 +354,13 @@ Modules in beta are still included in releases for the most part but not enabled
 | atv_decoder         | Unfinished | -            | OPT_BUILD_ATV_DECODER         | ⛔              | ⛔              | ⛔                         |
 | dab_decoder         | Unfinished | -            | OPT_BUILD_DAB_DECODER         | ⛔              | ⛔              | ⛔                         |
 | falcon9_decoder     | Unfinished | ffplay       | OPT_BUILD_FALCON9_DECODER     | ⛔              | ⛔              | ⛔                         |
-| kgsstv_decoder      | Unfinished | -            | OPT_BUILD_KGSSTV_DECODER      | ⛔              | ⛔              | ⛔                         |
+| kg_sstv_decoder     | Unfinished | -            | OPT_BUILD_KG_SSTV_DECODER     | ⛔              | ⛔              | ⛔                         |
 | m17_decoder         | Working    | -            | OPT_BUILD_M17_DECODER         | ⛔              | ✅              | ⛔                         |
 | meteor_demodulator  | Working    | -            | OPT_BUILD_METEOR_DEMODULATOR  | ✅              | ✅              | ⛔                         |
 | pager_decoder       | Unfinished | -            | OPT_BUILD_PAGER_DECODER       | ⛔              | ⛔              | ⛔                         |
 | radio               | Working    | -            | OPT_BUILD_RADIO               | ✅              | ✅              | ✅                         |
-| radio               | Unfinished | -            | OPT_BUILD_VOR_RECEIVER        | ⛔              | ⛔              | ⛔                         |
+| ryfi_decoder        | Working    | -            | OPT_BUILD_RYFI_DECODER        | ⛔              | ⛔              | ⛔                         |
+| vor_receiver        | Unfinished | -            | OPT_BUILD_VOR_RECEIVER        | ⛔              | ⛔              | ⛔                         |
 | weather_sat_decoder | Unfinished | -            | OPT_BUILD_WEATHER_SAT_DECODER | ⛔              | ⛔              | ⛔                         |
 
 ## Misc

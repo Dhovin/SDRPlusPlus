@@ -65,7 +65,7 @@ public:
         handler.tuneHandler = tune;
         handler.stream = &stream;
 
-        strcpy(hostname, host.c_str());
+        snprintf(hostname, sizeof(hostname), "%s", host.c_str());
 
         sigpath::sourceManager.registerSource("SpyServer", &handler);
     }

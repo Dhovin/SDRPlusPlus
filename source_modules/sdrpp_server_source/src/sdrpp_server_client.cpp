@@ -168,6 +168,12 @@ namespace server {
                 break;
             }
 
+            // Validate packet size
+            if (r_pkt_hdr->size > SERVER_MAX_PACKET_SIZE || r_pkt_hdr->size < sizeof(PacketHeader)) {
+                flog::error("Received invalid packet size from server: {0}", r_pkt_hdr->size);
+                break;
+            }
+
             // Receive remaining data
             if (sock->recv(&rbuffer[sizeof(PacketHeader)], r_pkt_hdr->size - sizeof(PacketHeader), true, PROTOCOL_TIMEOUT_MS) <= 0) {
                 break;

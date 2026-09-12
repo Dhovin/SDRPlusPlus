@@ -28,13 +28,13 @@ public:
         this->name = name;
 
         // Load default
-        strcpy(host, "127.0.0.1");
+        snprintf(host, sizeof(host), "127.0.0.1");
 
         // Load config
         config.acquire();
         if (config.conf[name].contains("host")) {
             std::string h = config.conf[name]["host"];
-            strcpy(host, h.c_str());
+            snprintf(host, sizeof(host), "%s", h.c_str());
         }
         if (config.conf[name].contains("port")) {
             port = config.conf[name]["port"];

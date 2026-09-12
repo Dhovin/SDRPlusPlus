@@ -244,11 +244,14 @@ namespace net::rigctl {
         listener->stop();
         if (listenThread.joinable()) { listenThread.join(); }
 
-        // Stop individual client threads
-        while (true) {
-            // Check how many sockets are left and stop if they're all closed
-            
+        // Close all active client connections
+        std::lock_guard<std::mutex> lck(socketsMtx);
+        for (auto& s : sockets) {
+            if (s && s->isOpen()) {
+                s->close();
+            }
         }
+        sockets.clear();
     }
 
     void Server::listenWorker() {

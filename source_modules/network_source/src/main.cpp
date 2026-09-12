@@ -85,7 +85,7 @@ public:
         }
         if (config.conf[name].contains("host")) {
             std::string hostStr = config.conf[name]["host"];
-            strcpy(hostname, hostStr.c_str());
+            snprintf(hostname, sizeof(hostname), "%s", hostStr.c_str());
         }
         if (config.conf[name].contains("port")) {
             port = config.conf[name]["port"];

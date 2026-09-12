@@ -158,7 +158,7 @@ void MainWindow::init() {
         }
     }
     else {
-        flog::warn("Color map directory {0} does not exist, not loading modules from directory", modulesDir);
+        flog::warn("Color map directory {0} does not exist, not loading color maps from directory", resourcesDir + "/colormaps");
     }
 
     gui::waterfall.updatePalletteFromArray(colormaps::maps["Turbo"].map, colormaps::maps["Turbo"].entryCount);
