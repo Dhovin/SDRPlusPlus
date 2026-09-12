@@ -69,11 +69,11 @@ void test_buffer_allocation() {
 
 // 2. Test DSP Complex Types
 void test_dsp_complex_types() {
-    dsp::complex_t c1(3.0f, 4.0f);
+    dsp::complex_t c1{ 3.0f, 4.0f };
     ASSERT_EQ(c1.re, 3.0f);
     ASSERT_EQ(c1.im, 4.0f);
 
-    dsp::complex_t c2(1.0f, 2.0f);
+    dsp::complex_t c2{ 1.0f, 2.0f };
     dsp::complex_t c_sum = c1 + c2;
     ASSERT_EQ(c_sum.re, 4.0f);
     ASSERT_EQ(c_sum.im, 6.0f);
@@ -112,9 +112,9 @@ void test_server_protocol_bounds() {
 // 4. Test Command Line Arguments Parser
 void test_command_args_parser() {
     CommandArgsParser parser;
-    parser.define("root", 'r', "Root directory", std::string("."));
-    parser.define("server", 's', "Server mode", false);
-    parser.define("port", 'p', "Port number", 5259);
+    parser.define('r', "root", "Root directory", std::string("."));
+    parser.define('s', "server", "Server mode");
+    parser.define('p', "port", "Port number", 5259);
 
     const char* argv[] = { "sdrpp", "-r", "root_test", "-s", "-p", "1234" };
     int argc = sizeof(argv) / sizeof(argv[0]);

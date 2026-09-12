@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <gui/smgui.h>
 #include <dsp/types.h>
+#include <dsp/stream.h>
 
 #define SERVER_MAX_PACKET_SIZE  (STREAM_BUFFER_SIZE * sizeof(dsp::complex_t) * 2)
 
