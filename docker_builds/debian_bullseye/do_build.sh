@@ -3,14 +3,14 @@ set -e
 cd /root
 
 # Install dependencies and tools
-apt update
-apt install -y build-essential cmake git libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libairspy-dev \
+apt update || apt update
+apt install -y --fix-missing build-essential cmake git libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libairspy-dev \
             libiio-dev libad9361-dev librtaudio-dev libhackrf-dev librtlsdr-dev libbladerf-dev liblimesuite-dev p7zip-full wget portaudio19-dev \
             libcodec2-dev autoconf libtool xxd libspdlog-dev
 
 # Install SDRPlay libraries
 SDRPLAY_ARCH=$(dpkg --print-architecture)
-wget https://web.archive.org/web/2024/https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.2.run
+wget https://web.archive.org/web/20241005190348if_/https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.2.run
 7z x ./SDRplay_RSP_API-Linux-3.15.2.run
 7z x ./SDRplay_RSP_API-Linux-3.15.2
 cp $SDRPLAY_ARCH/libsdrplay_api.so.3.15 /usr/lib/libsdrplay_api.so

@@ -8,11 +8,11 @@ function Safe-Copy {
     }
 }
 
-mkdir sdrpp_windows_x64 -ErrorAction SilentlyContinue
-mkdir sdrpp_windows_x64/modules -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Path sdrpp_windows_x64 -Force -ErrorAction SilentlyContinue
 
-# Copy root
-cp -Recurse $root_dir/* sdrpp_windows_x64/
+# Copy root contents
+Copy-Item -Path "$root_dir/*" -Destination sdrpp_windows_x64/ -Recurse -Force
+New-Item -ItemType Directory -Path sdrpp_windows_x64/modules -Force -ErrorAction SilentlyContinue
 
 # Copy core
 cp $build_dir/Release/* sdrpp_windows_x64/
