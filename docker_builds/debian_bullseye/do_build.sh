@@ -2,9 +2,16 @@
 set -e
 cd /root
 
+# Configure working snapshot repository for Bullseye
+cat << 'EOF' > /etc/apt/sources.list
+deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20240701T000000Z/ bullseye main contrib non-free
+deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20240701T000000Z/ bullseye-updates main contrib non-free
+EOF
+echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+
 # Install dependencies and tools
-apt update || apt update
-apt install -y --fix-missing build-essential cmake git libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libairspy-dev \
+apt update
+apt install -y build-essential cmake git libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libairspy-dev \
             libiio-dev libad9361-dev librtaudio-dev libhackrf-dev librtlsdr-dev libbladerf-dev liblimesuite-dev p7zip-full wget portaudio19-dev \
             libcodec2-dev autoconf libtool xxd libspdlog-dev
 
