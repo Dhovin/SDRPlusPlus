@@ -677,7 +677,9 @@ jobs:
           uses: actions/download-artifact@v4
 
         - name: Update Nightly
-          run: gh release upload nightly sdrpp_all/* -R ${{github.repository}} --clobber
+          run: |
+            gh release view nightly -R ${{github.repository}} || gh release create nightly -t "Nightly Build" -n "Automated nightly build artifacts for SDR++" --prerelease -R ${{github.repository}}
+            gh release upload nightly sdrpp_all/* -R ${{github.repository}} --clobber
 
     check_spelling:
         runs-on: ubuntu-latest
