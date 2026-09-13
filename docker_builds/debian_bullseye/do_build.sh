@@ -2,12 +2,14 @@
 set -e
 cd /root
 
-# Configure working snapshot repository for Bullseye
+# Configure working snapshot repository for Bullseye (both main and security synchronized)
 cat << 'EOF' > /etc/apt/sources.list
-deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20240701T000000Z/ bullseye main contrib non-free
-deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20240701T000000Z/ bullseye-updates main contrib non-free
+deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20260901T000000Z/ bullseye main contrib non-free
+deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20260901T000000Z/ bullseye-updates main contrib non-free
+deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/20260901T000000Z/ bullseye-security main contrib non-free
 EOF
 echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+echo 'Acquire::Retries "3";' >> /etc/apt/apt.conf.d/99no-check-valid-until
 
 # Install dependencies and tools
 apt update
